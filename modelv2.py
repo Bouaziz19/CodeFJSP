@@ -70,21 +70,21 @@ if 1 :# #  var
 
 
 if 1 :# #  objective function
-                obj=model.setObjective( gp.quicksum(Cijk[i,j,k] for k in lm for i in lo for j in lj  ), sense=gp.GRB.MINIMIZE) # 
+                # obj=model.setObjective( gp.quicksum(Cijk[i,j,k] for k in lm for i in lo for j in lj  ), sense=gp.GRB.MINIMIZE) # 
                 # obj=model.setObjective( alpha * (Cmax) + beta * (Xijk[i,j,'H'] * dWj[i,j,'H']), sense=gp.GRB.MINIMIZE) # 
-                # obj=model.setObjective( gp.quicksum(Yijijk[i,j,ii,jj,k] for k in lm for i in lo for j in lj for ii in lo for jj in lj ), sense=gp.GRB.MINIMIZE) # 
+                obj=model.setObjective( gp.quicksum(Yijijk[i,j,ii,jj,k] for k in lm for i in lo for j in lj for ii in lo for jj in lj ), sense=gp.GRB.MINIMIZE) # 
 
                 
 if 1 :# #  constraint
             # !   Cmax   ;
         c1 = model.addConstrs(gp.quicksum(Xijk[i,j,k] for k in lmachines) ==1  for i in loperations for j in ljobs ) 
         c2 = model.addConstrs(Sijk[i,j,k] +Cijk[i,j,k]<=Xijk[i,j,k]*M for k in lmachines for i in loperations for j in ljobs ) 
-        # c3 = model.addConstrs(Cijk[i,j,k]>=Sijk[i,j,k]+dPT[i,j,k]-(1-Xijk[i,j,k])*M for k in lmachines for i in loperations for j in ljobs )
-        # c6 = model.addConstrs(gp.quicksum(Sijk[loperations[i],j,k]  for k in lmachines)  >= gp.quicksum(Cijk[loperations[i-1],j,k]for k in lmachines)   for i in range(1,len(loperations) )for j in ljobs )    
+        c3 = model.addConstrs(Cijk[i,j,k]>=Sijk[i,j,k]+dPT[i,j,k]-(1-Xijk[i,j,k])*M for k in lmachines for i in loperations for j in ljobs )
+        c6 = model.addConstrs(gp.quicksum(Sijk[loperations[i],j,k]  for k in lmachines)  >= gp.quicksum(Cijk[loperations[i-1],j,k]for k in lmachines)   for i in range(1,len(loperations) )for j in ljobs )    
         c8 = model.addConstrs(Cmax >= Cijk[i,j,k] for k in lmachines for i in loperations for j in ljobs )
         c7 = model.addConstrs( Ci[j]>= Cijk[i,j,k] for k in lmachines for i in loperations for j in ljobs)  
 
-        c8 = model.addConstrs( gp.quicksum(Yijijk[i,j,ii,jj,k] for k in lmachines)<=1 for ii in loperations for jj in ljobs  for i in loperations for j in ljobs)   
+        # c8 = model.addConstrs( gp.quicksum(Yijijk[i,j,ii,jj,k] for k in lmachines)<=1 for ii in loperations for jj in ljobs  for i in loperations for j in ljobs)   
 
 
         for vi in range(NO):
@@ -98,8 +98,10 @@ if 1 :# #  constraint
                                     j=lj[vj]
                                     jj=lj[vjj]
                                     k=lm[vk]
-                                    c4 = model.addConstrs(Sijk[ii,jj,k]>= Cijk[i,j,k] - (M*Yijijk[i,j,ii,jj,k] ) for ll in range(1) )
-                                    c5 = model.addConstrs(Sijk[i,j,k]>= Cijk[ii,jj,k] - (M*(1-Yijijk[i,j,ii,jj,k]) ) for ll in range(1) )
+                                    c4 = model.addConstrs( Yijijk[i,j,ii,jj,k]==1 for ll in range(1) )
+
+                                    # c4 = model.addConstrs(Sijk[ii,jj,k]>= Cijk[i,j,k] - (M*Yijijk[i,j,ii,jj,k] ) for ll in range(1) )
+                                    # c5 = model.addConstrs(Sijk[i,j,k]>= Cijk[ii,jj,k] - (M*(1-Yijijk[i,j,ii,jj,k]) ) for ll in range(1) )
 
 
 if 1 : #  optimize
