@@ -41,6 +41,10 @@ def get_dic_3d(dval,lval1,lval2,lval3):
     li=len(lval1)
     lj=len(lval2)
     lk=len(lval3)
+    print(li)
+    print(lj)
+    print(lk)
+
     for i in range(li):
         kval1 = lval1[i]
         for j in range(lj):
