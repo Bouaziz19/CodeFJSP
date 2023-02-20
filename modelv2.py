@@ -1,4 +1,6 @@
-from  input23 import *
+# from  input23 import *
+from  input37 import *
+
 from  func import *
 import numpy as np
 
@@ -11,7 +13,7 @@ if 1 :# #   param
      model.setParam("IntegralityFocus",1)
      model.setParam("IntFeasTol",1e-9)
      # model.setParam('TimeLimit', 5*60)
-    #  model.setParam('MIPGap', 0.90)
+     model.setParam('MIPGap', 0.80)
      # model.Params.LogToConsole = 1
      # model.params.NonConvex = 2
      pass
@@ -82,29 +84,22 @@ if 1 :# #  constraint
             # !   Cmax   ;
         c1 = model.addConstrs(gp.quicksum(Xijk[i,j,k] for k in lmachines) >= 1  for i in loperations for j in ljobs ) 
         c12 = model.addConstrs(Xijk[i,j,k] >= Xijk[i,j,"Co"]  for k in lmachines  for i in loperations for j in ljobs ) 
-        c13 = model.addConstrs(PTE[i,j,k] == dPT[i,j,k]*(1-Xijk[i,j,"Co"])+dPT[i,j,"Co"]*(Xijk[i,j,"Co"]) for k in lmachines for i in loperations for j in ljobs )
-        c14 = model.addConstrs(Sijk[i,j,k] == Sijk[i,j,"Co"]*(Xijk[i,j,"Co"]) +Sijk[i,j,k]*(1-Xijk[i,j,"Co"])  for k in lmachines for i in loperations for j in ljobs ) 
-        # c14 = model.addConstrs(Cijk[i,j,k] <= Cijk[i,j,"Co"]*(Xijk[i,j,"Co"]) +(1-Xijk[i,j,"Co"])*M   for k in lmachines for i in loperations for j in ljobs ) 
+        c6 = model.addConstrs(Sijk[i,j,k] +Cijk[i,j,k]<=Xijk[i,j,k]*M for k in lmachines for i in loperations for j in ljobs ) 
+        c13 = model.addConstrs(PTE[i,j,k] ==  dPT[i,j,k]*(1-Xijk[i,j,"Co"])   +    dPT[i,j,"Co"]*(Xijk[i,j,"Co"]) for k in lmachines for i in loperations for j in ljobs )
+        c14 = model.addConstrs(Sijk[i,j,k] == Sijk[i,j,k]*(1-Xijk[i,j,"Co"])+Sijk[i,j,"Co"]*(Xijk[i,j,"Co"])   for k in lmachines for i in loperations for j in ljobs ) 
 
         c2 = model.addConstrs(Sijk[i,j,k] +Cijk[i,j,k]<=Xijk[i,j,k]*M for k in lmachines for i in loperations for j in ljobs ) 
         c3 = model.addConstrs(Cijk[i,j,k]>=Sijk[i,j,k]+PTE[i,j,k]-(1-Xijk[i,j,k])*M for k in lmachines for i in loperations for j in ljobs )
-        # c6 = model.addConstrs(gp.quicksum(Sijk[loperations[i],j,k]  for k in lmachines)  >= gp.quicksum(Cijk[loperations[i-1],j,k]for k in lmachines)   for i in range(1,len(loperations) )for j in ljobs )    
         c8 = model.addConstrs(Cmax >= Cijk[i,j,k] for k in lmachines for i in loperations for j in ljobs )
         c7 = model.addConstrs( Ci[j]>= Cijk[i,j,k] for k in lmachines for i in loperations for j in ljobs)  
-        
+        # i,j =4
+        # ii,jj=5
         c91 = model.addConstrs( Sijk[i,j,k]*Yijijk[i,j,ii,jj,k]+M*(1-Xijk[i,j,k])+ M*(1-Xijk[ii,jj,k])  >=Cijk[ii,jj,k]*Yijijk[i,j,ii,jj,k]  for k in ["H","R","Co"] for ii in loperations for jj in ljobs  for i in loperations for j in ljobs)   
-        # c92 = model.addConstrs( Sijk[i,j,"Co"]*Yijijk[i,j,ii,jj,"Co"]+M*(1-Xijk[i,j,"Co"])+ M*(1-Xijk[ii,jj,"Co"]) >=Cijk[ii,jj,"Co"]*Yijijk[i,j,ii,jj,"Co"]for ii in loperations for jj in ljobs  for i in loperations for j in ljobs)   
-        # c93 = model.addConstrs( Sijk[i,j,"Co"]*Yijijk[i,j,ii,jj,"Co"] >=Cijk[ii,jj,"R"]*Yijijk[i,j,ii,jj,"Co"] for ii in loperations for jj in ljobs  for i in loperations for j in ljobs)   
-        # c94 = model.addConstrs( Sijk[i,j,"Co"]*Yijijk[i,j,ii,jj,"Co"] >=Cijk[ii,jj,"H"]*Yijijk[i,j,ii,jj,"Co"]  for ii in loperations for jj in ljobs  for i in loperations for j in ljobs)   
-        
-        # c9 = model.addConstrs( Sijk[i,j,k]*Yijijk[i,j,ii,jj,k] >=Cijk[ii,jj,k]*Yijijk[i,j,ii,jj,k]  for k in lmachines for ii in loperations for jj in ljobs  for i in loperations for j in ljobs)   
-        
-        c11 = model.addConstrs( gp.quicksum(Sijk[i,j,k]for k in lmachines)*dP[i,j,ii,jj] >=gp.quicksum(Cijk[ii,jj,k] for k in lmachines)*dP[i,j,ii,jj]  for ii in loperations for jj in ljobs  for i in loperations for j in ljobs)   
-
-
-        
-        # c9 = model.addConstrs( Sijk[i,j,k]*Yijijk[i,j,ii,jj,k] +(1-Xijk[i,j,k])*M+ M*(1-Xijk[ii,jj,k])>=Cijk[ii,jj,k]*Yijijk[i,j,ii,jj,k]  for k in lmachines for ii in loperations for jj in ljobs  for i in loperations for j in ljobs)   
-        # Sijk[i,j,k]*Yijijk[i,j,ii,jj,k]*Xijk[i,j,k]*Xijk[ii,jj,k] >= Cijk[ii,jj,k]*Yijijk[i,j,ii,jj,k]*Xijk[i,j,k]*Xijk[ii,jj,k]
+        # i,j =4
+        # ii,jj=5
+        # c11 = model.addConstrs( gp.quicksum(Sijk[i,j,k]for k in lmachines)*dP[i,j,ii,jj] >=gp.quicksum(Cijk[ii,jj,k] for k in lmachines)*dP[i,j,ii,jj]  for ii in loperations for jj in ljobs  for i in loperations for j in ljobs)   
+        c11 = model.addConstrs( gp.quicksum(Sijk[i,j,k]for k in lmachines)*dP[i,j,ii,jj]*(1-Xijk[i,j,"Co"])+Sijk[i,j,"Co"]*dP[i,j,ii,jj]*(Xijk[i,j,"Co"]) >=gp.quicksum(Cijk[ii,jj,k] for k in lmachines)*dP[i,j,ii,jj]*(1-Xijk[ii,jj,"Co"])+Cijk[ii,jj,"Co"] *dP[i,j,ii,jj]*(Xijk[ii,jj,"Co"])  for ii in loperations for jj in ljobs  for i in loperations for j in ljobs)   
+        # c11 = model.addConstrs( gp.quicksum(Sijk[i,j,k]/(1+2*(Xijk[i,j,"Co"]))for k in lmachines)*dP[i,j,ii,jj] >=gp.quicksum(Cijk[ii,jj,k]/(1+2*(Xijk[ii,jj,"Co"])) for k in lmachines)*dP[i,j,ii,jj]  for ii in loperations for jj in ljobs  for i in loperations for j in ljobs)   
 
         for vi in range(NO):
             for vj in range(NJ):
@@ -116,23 +111,8 @@ if 1 :# #  constraint
                             j=lj[vj]
                             jj=lj[vjj]
                             k=lm[vk]
-                            # c4 = model.addConstrs(Sijk[i,j,k]*Yijijk[i,j,ii,jj,k]*Xijk[i,j,k]*Xijk[ii,jj,k] >= Cijk[ii,jj,k]*Yijijk[i,j,ii,jj,k]*Xijk[i,j,k]*Xijk[ii,jj,k]   for ll in range(1) )
-
                             if vi*NJ+vj<vii*NJ+vjj:
                                 c8 = model.addConstrs( Yijijk[i,j,ii,jj,k]+Yijijk[ii,jj,i,j,k] ==1 for ll in range(1)) 
-                                # c9 = model.addConstrs(Yijijk[ii,jj,i,j,k] ==1 for ll in range(1))   
-
-
-                                pass
-                                #     i=lo[vi]
-                                #     ii=lo[vii]
-                                #     j=lj[vj]
-                                #     jj=lj[vjj]
-                                #     k=lm[vk]
-                                # c44 = model.addConstrs( Yijijk[i,j,ii,jj,k]==0 for ll in range(1) )
-                                    # c4 = model.addConstrs(Sijk[i,j,k]>= Cijk[ii,jj,k] - (M*(Yijijk[i,j,ii,jj,k]) ) for ll in range(1) )
-                                    # c5 = model.addConstrs(Sijk[ii,jj,k]>= Cijk[i,j,k] - (M*(1-Yijijk[i,j,ii,jj,k] )) for ll in range(1) )
-                                    # s5*Y54h*X4h*X5h	>=	C4*Y54h*X4h*X5h
 
 
 
